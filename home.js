@@ -2,15 +2,15 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView, Dimensions, View, Text, TextInput, Image, FlatList, TouchableOpacity } from "react-native";
 import { Card } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
-import { db } from "./firebaseConfig"; // Adjust the path as necessary
-import { doc, setDoc, collection, onSnapshot } from "firebase/firestore"; // Import Firestore methods
+import { db } from "./firebaseConfig";
+import { doc, setDoc, collection, onSnapshot } from "firebase/firestore";
 import styles from "./styles";
 
 export const HabitTracker = () => {
   const [habits, setHabits] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newHabit, setNewHabit] = useState({ name: "", frequency: "", image: null });
-  const userId = "USER_ID";
+  const userId = "USER_ID"; // not sure about this...
 
   const { width } = Dimensions.get('window');
 
@@ -32,30 +32,30 @@ export const HabitTracker = () => {
 
   const saveHabit = async () => {
     if (newHabit.name && newHabit.frequency) {
-      // Save habit to Firestore
-      const habitRef = doc(collection(db, "users", userId, "habits")); // Use user's ID to create a subcollection for habits
+      // save habit to firestore
+      const habitRef = doc(collection(db, "users", userId, "habits")); // use user's id to create a subcollection for habits
       await setDoc(habitRef, newHabit);
 
-      setHabits([...habits, newHabit]); // Update local state
+      setHabits([...habits, newHabit]); // display all saved habits
       setIsDialogOpen(false);
       setNewHabit({ name: "", frequency: "", image: null });
     } else {
-      alert("Make sure you've filled all the fields!");
+      alert("make sure you've filled all the fields!");
     }
   };
 
-  // Fetch habits from Firestore when the component mounts
+  // fetch habits from firestore when the component initiates
   useEffect(() => {
     const fetchHabits = async () => {
       const habitsCollection = collection(db, "users", userId, "habits");
       
-      // Real-time listener that updates the UI whenever the data changes
+      // real-time listener to update ui when the user adds a habit
       const unsubscribe = onSnapshot(habitsCollection, (snapshot) => {
         const fetchedHabits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setHabits(fetchedHabits);
       });
 
-      // Clean up the subscription on unmount
+      // clean up the subscription on close
       return () => unsubscribe();
     };
 
@@ -68,7 +68,7 @@ export const HabitTracker = () => {
       <FlatList
         contentContainerStyle={{ flexGrow: 1 }}
         data={habits}
-        keyExtractor={(item) => item.id} // Use the Firestore document ID as key
+        keyExtractor={(item) => item.id} // use the firestore document id as key
         style={{ flex: 1 }}
         renderItem={({ item }) => (
           <Card style={styles.cardContainer}>
